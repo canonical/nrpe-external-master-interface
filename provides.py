@@ -18,6 +18,7 @@ class NrpeExternalMasterProvides(RelationBase):
         self.remove_state('{relation_name}.available')
 
     def add_check(self, args, name=None, description=None, context=None, unit=None):
+        unit = unit.replace('/','-')
         check_tmpl = """
 #---------------------------------------------------
 # This file is Juju managed
