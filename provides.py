@@ -30,7 +30,7 @@ command[%(check_name)s]=%(check_args)s
 #---------------------------------------------------
 define service {               
     use                             active-service                  
-    host_name                       %(context)s-%(unit_name)s
+    host_name                       juju-%(unit_name)s
     service_description             %(description)s
     check_command                   check_nrpe!%(check_name)s
     servicegroups                   %(context)s
