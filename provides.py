@@ -18,7 +18,7 @@ class NrpeExternalMasterProvides(RelationBase):
         self.remove_state('{relation_name}.available')
 
     def add_check(self, args, name=None, description=None, context=None, unit=None):
-        unit = unit.replace('/','-')
+        unit = unit.replace('/', '-')
         check_tmpl = """
 #---------------------------------------------------
 # This file is Juju managed
@@ -29,8 +29,8 @@ command[%(check_name)s]=%(check_args)s
 #---------------------------------------------------
 # This file is Juju managed
 #---------------------------------------------------
-define service {               
-    use                             active-service                  
+define service {
+    use                             active-service
     host_name                       juju-%(unit_name)s
     service_description             %(description)s
     check_command                   check_nrpe!%(check_name)s
@@ -51,7 +51,6 @@ define service {
                 'check_name': name,
                 'unit_name': unit,
             })
-
 
     def updated(self):
         relation_info = {
