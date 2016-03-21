@@ -17,7 +17,7 @@ class NrpeExternalMasterProvides(RelationBase):
         self.remove_state('{relation_name}.available')
 
     def add_check(self, args, name=None, description=None, context=None,
-                  unit=None):
+                  servicegroups=None, unit=None):
         unit = unit.replace('/', '-')
         check_tmpl = """
 #---------------------------------------------------
@@ -31,10 +31,10 @@ command[%(check_name)s]=%(check_args)s
 #---------------------------------------------------
 define service {
     use                             active-service
-    host_name                       juju-%(unit_name)s
+    host_name                       %(context)s-%(unit_name)s
     service_description             %(description)s
     check_command                   check_nrpe!%(check_name)s
-    servicegroups                   %(context)s
+    servicegroups                   %(servicegroups)s
 }
 """
         check_filename = "/etc/nagios/nrpe.d/%s.cfg" % (name)
@@ -47,6 +47,7 @@ define service {
                            unit, name)
         with open(service_filename, "w") as fh:
             fh.write(service_tmpl % {
+                'servicegroups': servicegroups or context,
                 'context': context,
                 'description': description,
                 'check_name': name,
