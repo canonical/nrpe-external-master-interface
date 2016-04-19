@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from charmhelpers.core import hookenv
 from charms.reactive import hook
@@ -16,9 +17,16 @@ class NrpeExternalMasterProvides(RelationBase):
     @hook('{provides:nrpe-external-master}-relation-{broken,departed}')
     def broken_nrpe(self):
         self.remove_state('{relation_name}.available')
+        self.set_state('{relation_name}.removed')
 
     def add_check(self, args, name=None, description=None, context=None, unit=None):
-        unit = unit.replace('/', '-')
+        nagios_files = self.get_local('nagios.check.files', [])
+
+        if not unit:
+            unit = hookenv.local_unit().replace('/', '-')
+        host_name = self.get_remote('nagios_hostname', 'juju-%s' % (unit))
+        context = self.get_remote('nagios_host_context', context)
+
         check_tmpl = """
 #---------------------------------------------------
 # This file is Juju managed
@@ -31,7 +39,7 @@ command[%(check_name)s]=%(check_args)s
 #---------------------------------------------------
 define service {
     use                             active-service
-    host_name                       juju-%(unit_name)s
+    host_name                       %(host_name)s
     service_description             %(description)s
     check_command                   check_nrpe!%(check_name)s
     servicegroups                   %(context)s
@@ -43,14 +51,32 @@ define service {
                 'check_args': ' '.join(args),
                 'check_name': name,
             })
+        nagios_files.append(check_filename)
+
         service_filename = "/var/lib/nagios/export/service__%s_%s.cfg" % (unit, name)
         with open(service_filename, "w") as fh:
             fh.write(service_tmpl % {
                 'context': context,
                 'description': description,
                 'check_name': name,
-                'unit_name': unit,
+                'host_name': host_name,
             })
+        nagios_files.append(service_filename)
+
+        self.set_local('nagios.check.files', nagios_files)
+
+    def removed(self):
+        files = self.get_local('nagios.check.files', [])
+        for f in files:
+            try:
+                os.unlink(f)
+            except Exception as e:
+                hookenv.log("failed to remove %s: %s" % (f, e))
+        self.set_local('nagios.check.files', [])
+        self.remove_state('{relation_name}.removed')
+
+    def added(self):
+        self.updated()
 
     def updated(self):
         relation_info = {
