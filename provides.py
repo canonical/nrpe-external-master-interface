@@ -37,7 +37,7 @@ define service {
     servicegroups                   %(servicegroups)s
 }
 """
-        check_filename = "/etc/nagios/nrpe.d/%s.cfg" % (name)
+        check_filename = "/etc/nagios/nrpe.d/check_%s.cfg" % (name)
         with open(check_filename, "w") as fh:
             fh.write(check_tmpl % {
                 'check_args': ' '.join(args),
