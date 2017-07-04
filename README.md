@@ -47,6 +47,7 @@ def setup_nagios(nagios):
         unit=unit_name,
     )
 ```
+If your `nagios.add_check` defines a custom plugin, you will also need to restart the `nagios-nrpe-server`. 
 
 Consult the nagios documentation for more information on [how to write your own
 plugins](https://assets.nagios.com/downloads/nagioscore/docs/nagioscore/4/en/pluginapi.html)
