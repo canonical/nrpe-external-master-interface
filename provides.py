@@ -22,7 +22,12 @@ class NrpeExternalMasterProvides(RelationBase):
 
     def add_check(self, args, name=None, description=None, context=None,
                   servicegroups=None, unit=None):
-        unit = unit.replace('/', '-')
+        nagios_files = self.get_local('nagios.check.files', [])
+
+        if not unit:
+            unit = hookenv.local_unit().replace('/', '-')
+        context = self.get_remote('nagios_host_context', context)
+
         check_tmpl = """
 #---------------------------------------------------
 # This file is Juju managed
