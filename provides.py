@@ -25,8 +25,10 @@ class NrpeExternalMasterProvides(RelationBase):
         nagios_files = self.get_local('nagios.check.files', [])
 
         if not unit:
-            unit = hookenv.local_unit().replace('/', '-')
+            unit = hookenv.local_unit()
+        unit = unit.replace('/', '-')
         context = self.get_remote('nagios_host_context', context)
+        host_name = self.get_remote('nagios_hostname', '%s-%s' % (context, unit))
 
         check_tmpl = """
 #---------------------------------------------------
@@ -40,7 +42,7 @@ command[%(check_name)s]=%(check_args)s
 #---------------------------------------------------
 define service {
     use                             active-service
-    host_name                       %(context)s-%(unit_name)s
+    host_name                       %(host_name)s
     service_description             %(description)s
     check_command                   check_nrpe!%(check_name)s
     servicegroups                   %(servicegroups)s
@@ -62,6 +64,7 @@ define service {
                 'context': context,
                 'description': description,
                 'check_name': name,
+                'host_name': host_name,
                 'unit_name': unit,
             })
         nagios_files.append(service_filename)
