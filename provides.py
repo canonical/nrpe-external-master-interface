@@ -27,7 +27,8 @@ class NrpeExternalMasterProvides(RelationBase):
             unit = hookenv.local_unit()
         unit = unit.replace('/', '-')
         context = self.get_remote('nagios_host_context', context)
-        host_name = self.get_remote('nagios_hostname', '%s-%s' % (context, unit))
+        host_name = self.get_remote('nagios_hostname',
+                                    '%s-%s' % (context, unit))
 
         check_tmpl = """
 #---------------------------------------------------
